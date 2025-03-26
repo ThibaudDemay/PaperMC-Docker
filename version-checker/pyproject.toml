@@ -1,0 +1,22 @@
+[project]
+name = "papermc_docker_version_checker"
+version = "0.1.0"
+description = "PaperMC API"
+authors = [
+    {name = "Thibaud Demay", email = "8266439+ThibaudDemay@users.noreply.github.com"},
+]
+dependencies = [
+    "urllib3>=1.25.3,<3.0.0",
+    "python-dateutil>=2.8.2",
+    "pydantic>=2",
+    "typing-extensions>=4.7.1",
+    "semver>=3.0.4"
+]
+requires-python = ">=3.8"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false
+
