@@ -10,6 +10,6 @@ WORKDIR /app
 
 COPY --chmod=0700 run.sh /app/run.sh
 
-ADD PAPERMC_DOWNLOAD_URL /app/paper.jar
+ADD $PAPERMC_DOWNLOAD_URL /app/paper.jar
 
 ENTRYPOINT ["/app/run.sh"]
