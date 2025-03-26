@@ -1,0 +1,6 @@
+version: '3'
+
+tasks:
+  generate-api:
+    cmds:
+      - openapi-generator generate -i https://api.papermc.io/openapi -g python -o ./version-checker --skip-validate-spec --package-name papermc_api_client --additional-properties projectName=papermc-api --additional-properties generateSourceCodeOnly=true
