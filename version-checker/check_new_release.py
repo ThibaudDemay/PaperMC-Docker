@@ -165,6 +165,8 @@ if __name__ == "__main__":
     need_build_docker_versions = get_wanted_docker_versions(last_docker_build_state["build"], work_versions)
     last_docker_build_state["need_build"] = list(set(last_docker_build_state["need_build"] + need_build_docker_versions))
 
+    last_docker_build_state["need_build"].sort(key=lambda x: (x.split("-")[0], int(x.split("-")[1])))
+
     # Save need_build
     save_last_docker_build_state(last_docker_build_state)
 
