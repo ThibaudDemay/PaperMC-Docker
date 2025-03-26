@@ -1,0 +1,4 @@
+version-checker/last_docker_build_state.json
+version-checker/.venv
+version-checker/.pdm-python
+__pycache__
