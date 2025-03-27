@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env sh
 
 if [ -n "${EULA}" -a "${EULA}" = "true" ]; then
-    echo "eula=true" > /app/eula.txt
+    echo "eula=true" > /app/data/eula.txt
 fi
 
-java -jar /app/paper.jar $@
+java -jar $JAVA_ARGS /app/paper.jar -nogui $@
