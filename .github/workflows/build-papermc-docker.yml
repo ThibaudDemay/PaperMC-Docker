@@ -1,0 +1,144 @@
+name: Build PaperMC Docker Image
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check-new-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get last workflow_runs id
+        id: get_last_workflow_runs_id
+        run: |
+          LAST_WORKFLOW_RUN_ID=$(gh api -X GET repos/thibauddemay/papermc-docker/actions/workflows/build-papermc-docker.yml/runs -f branch=main -f status=completed -f per_page=1 --jq '.workflow_runs[0].id')
+          echo "LAST_WORKFLOW_RUN_ID=${LAST_WORKFLOW_RUN_ID}" >> $GITHUB_ENV
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Download last_docker_build_state artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: last_docker_build_state
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ env.LAST_WORKFLOW_RUN_ID }}
+
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v4
+        with:
+          python-version: 3.13
+          cache: true
+          cache-dependency-path: 'pdm.lock'
+
+      - name: Install dependencies
+        run: pdm install
+
+      - name: Run check new release script
+        run: pdm run tools/check_new_release.py
+
+      - name: Upload last_docker_build_state artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: last_docker_build_state
+          path: last_docker_build_state.json
+
+  define-matrix:
+    runs-on: ubuntu-latest
+    needs: check-new-release
+
+    outputs:
+      need_build_version: ${{ steps.set-matrix.outputs.need_build }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Download last_docker_build_state artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: last_docker_build_state
+
+      - name: Define Matrix from json
+        id: set-matrix
+        run: echo "need_build=$(cat ./last_docker_build_state.json | jq -c '.need_build')" >> $GITHUB_OUTPUT
+
+  build:
+    runs-on: ubuntu-latest
+    needs: define-matrix
+    strategy:
+      max-parallel: 1
+      matrix:
+        version: ${{fromJson(needs.define-matrix.outputs.need_build_version)}}
+
+    steps:
+      - name: Set environment variables
+        run: |
+          PAPERMC_VERSION=$(cut -d '-' -f 1 <<< "${{ matrix.version }}")
+          echo "PAPERMC_VERSION=${PAPERMC_VERSION}" >> $GITHUB_ENV
+
+          PAPERMC_VERSION_GROUP=$(cut -d '.' -f 1,2 <<< "${PAPERMC_VERSION}")
+          echo "PAPERMC_VERSION_GROUP=${PAPERMC_VERSION_GROUP}" >> $GITHUB_ENV
+
+          PAPERMC_BUILD=$(cut -d '-' -f 2 <<< "${{ matrix.version }}")
+          echo "PAPERMC_BUILD=${PAPERMC_BUILD}" >> $GITHUB_ENV
+
+          curl -s "https://api.papermc.io/v2/projects/paper/versions/${PAPERMC_VERSION}/builds/${PAPERMC_BUILD}" > papermc_build_${{ matrix.version }}.json
+          PAPERMC_DOWNLOAD_FILENAME=$(jq -r '.downloads.application.name' papermc_build_${{ matrix.version }}.json)
+          echo "PAPERMC_DOWNLOAD_FILENAME=${PAPERMC_DOWNLOAD_FILENAME}" >> $GITHUB_ENV
+
+          PAPERMC_DOWNLOAD_URL=https://api.papermc.io/v2/projects/paper/versions/${PAPERMC_VERSION}/builds/${PAPERMC_BUILD}/downloads/${PAPERMC_DOWNLOAD_FILENAME}
+          echo "PAPERMC_DOWNLOAD_URL=${PAPERMC_DOWNLOAD_URL}" >> $GITHUB_ENV
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Download last_docker_build_state artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: last_docker_build_state
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./container
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/papermc:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/papermc:${{ env.PAPERMC_VERSION }}-${{ env.PAPERMC_BUILD }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/papermc:${{ env.PAPERMC_VERSION }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/papermc:${{ env.PAPERMC_VERSION_GROUP }}
+          build-args: |
+            PAPERMC_DOWNLOAD_URL=${{ env.PAPERMC_DOWNLOAD_URL }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Update last docker build state
+        run: python3 tools/update_last_docker_build_state.py ${{ matrix.version }}
+
+      - name: Upload last_docker_build_state artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: last_docker_build_state
+          path: last_docker_build_state.json
+          overwrite: true
