@@ -1,0 +1,102 @@
+#!/usr/bin/env python3
+from dataclasses import dataclass
+from pprint import pprint
+
+import papermc_api_client
+import semver
+from pymarshaler.marshal import Marshal
+from semver_tool import coerce
+
+PROJET = "paper"
+
+configuration = papermc_api_client.Configuration(
+    host = "https://api.papermc.io"
+)
+
+exclude_version_before = semver.Version.parse("1.21.4")
+exclude_build_before = "221"
+
+last_run_state = {
+    "version": [
+    ]
+}
+
+@dataclass
+class VersionBuild:
+    version: str
+    build: list[papermc_api_client.VersionBuild]
+
+@dataclass
+class VersionsList:
+    versions: list[VersionBuild]
+
+# def simplify_version_dict(version_dict: VersionsList) -> dict[str, list[str]]:
+#     return {version: [build.build for build in builds] for version, builds in work_versions.items()}
+
+def get_papermc_versions() -> list[str]:
+    with papermc_api_client.ApiClient(configuration) as api_client:
+        api_instance = papermc_api_client.ProjectControllerApi(api_client)
+        try:
+            project_response = api_instance.project(PROJET)
+            return project_response.versions
+        except Exception as e:
+            print("Exception when calling ProjectControllerApi->project: %s\n" % e)
+    return []
+
+def get_builds_for_version(version: str) -> list[papermc_api_client.VersionBuild]:
+    with papermc_api_client.ApiClient(configuration) as api_client:
+        api_instance = papermc_api_client.VersionBuildsControllerApi(api_client)
+        try:
+            builds_response = api_instance.builds(PROJET, version)
+            return builds_response.builds
+        except Exception as e:
+            print("Exception when calling VersionControllerApi->version: %s\n" % e)
+    return []
+
+def select_versions(versions: list[str]) -> list[str]:
+    selected_versions = []
+    for version in versions:
+        coerce_version, coerce_rest = coerce(version)
+        if exclude_version_before > coerce_version:
+            continue
+        selected_versions.append(version)
+    return selected_versions
+
+def get_wanted_docker_versions(previous_state: VersionsList, work_versions: VersionsList):
+    pass
+    # work_versions_processed = simplify_version_dict(work_versions)
+
+    # pprint(work_versions_processed)
+
+    # wanted_docker_versions = {}
+    # for version, builds in work_versions.items():
+    #     wanted_builds = []
+    #     for build in builds:
+    #         if build.build < exclude_build_before:
+    #             continue
+    #         wanted_builds.append(build.build)
+    #     wanted_docker_versions[version] = wanted_builds
+    # return wanted_docker_versions
+
+if __name__ == "__main__":
+    print("PaperMC versions:")
+    all_versions = get_papermc_versions()
+    keep_versions = select_versions(all_versions)
+
+    work_versions = VersionsList([])
+    for version in keep_versions:
+        all_builds = get_builds_for_version(version)
+        work_versions.versions.append(VersionBuild(version, all_builds))
+
+    pprint(work_versions)
+    pprint(Marshal.marshal(work_versions))
+
+    wanted_docker_versions = get_wanted_docker_versions({}, work_versions)
+
+
+
+    # last_version = versions[-1]
+    # builds = get_builds_for_version(last_version)
+    # print(f"Builds for version {last_version}:")
+    # pprint(builds)
+

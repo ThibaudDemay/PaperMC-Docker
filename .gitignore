@@ -1,4 +1,4 @@
 last_docker_build_state.json
-version-checker/.venv
-version-checker/.pdm-python
+.venv
+.pdm-python
 __pycache__
