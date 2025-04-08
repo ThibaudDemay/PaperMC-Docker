@@ -95,6 +95,8 @@ jobs:
           PAPERMC_DOWNLOAD_URL=https://api.papermc.io/v2/projects/paper/versions/${PAPERMC_VERSION}/builds/${PAPERMC_BUILD}/downloads/${PAPERMC_DOWNLOAD_FILENAME}
           echo "PAPERMC_DOWNLOAD_URL=${PAPERMC_DOWNLOAD_URL}" >> $GITHUB_ENV
 
+          echo "REPOSITORY_LOWERCASE=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
+
       - name: Checkout repository
         uses: actions/checkout@v2
 
@@ -133,10 +135,10 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/papermc:${{ env.PAPERMC_VERSION }}-${{ env.PAPERMC_BUILD }}
             ${{ secrets.DOCKERHUB_USERNAME }}/papermc:${{ env.PAPERMC_VERSION }}
             ${{ secrets.DOCKERHUB_USERNAME }}/papermc:${{ env.PAPERMC_VERSION_GROUP }}
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ env.PAPERMC_VERSION }}-${{ env.PAPERMC_BUILD }}
-            ghcr.io/${{ github.repository }}:${{ env.PAPERMC_VERSION }}
-            ghcr.io/${{ github.repository }}:${{ env.PAPERMC_VERSION_GROUP }}
+            ghcr.io/${{ env.REPOSITORY_LOWERCASE }}:latest
+            ghcr.io/${{ env.REPOSITORY_LOWERCASE }}:${{ env.PAPERMC_VERSION }}-${{ env.PAPERMC_BUILD }}
+            ghcr.io/${{ env.REPOSITORY_LOWERCASE }}:${{ env.PAPERMC_VERSION }}
+            ghcr.io/${{ env.REPOSITORY_LOWERCASE }}:${{ env.PAPERMC_VERSION_GROUP }}
           build-args: |
             PAPERMC_DOWNLOAD_URL=${{ env.PAPERMC_DOWNLOAD_URL }}
           cache-from: type=gha
