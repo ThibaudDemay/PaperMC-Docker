@@ -4,6 +4,7 @@ FROM amazoncorretto:${JVM_VERSION}
 
 ARG PAPERMC_DOWNLOAD_URL
 
+ENV EULA="true"
 ENV JAVA_ARGS="-Xms4G -Xmx4G"
 
 WORKDIR /app/data
