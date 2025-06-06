@@ -13,7 +13,7 @@ jobs:
       - name: Get last workflow_runs id
         id: get_last_workflow_runs_id
         run: |
-          LAST_WORKFLOW_RUN_ID=$(gh api -X GET repos/thibauddemay/papermc-docker/actions/workflows/build-papermc-docker.yml/runs -f branch=main -f status=completed -f per_page=1 --jq '.workflow_runs[0].id')
+          LAST_WORKFLOW_RUN_ID=$(gh api -X GET repos/thibauddemay/papermc-docker/actions/workflows/build-papermc-docker.yml/runs -f branch=main -f status=success -f per_page=1 --jq '.workflow_runs[0].id')
           echo "LAST_WORKFLOW_RUN_ID=${LAST_WORKFLOW_RUN_ID}" >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
