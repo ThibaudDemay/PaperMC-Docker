@@ -1,5 +1,12 @@
 # PaperMC Docker
 
+### TLDR;
+- Base Image : [Amazon Corretto](https://hub.docker.com/_/amazoncorretto)
+- Architecture : `amd64`, `arm64`
+- Supported Tags : `latest`, `X.y`, `X.y.z`, `X.y.z-build`
+
+## About
+
 This project provides a set of Docker images for running a PaperMC Minecraft server.
 
 The images are based on Amazon Corretto like the official [PaperMC docs](https://docs.papermc.io/misc/java-install) recommend and a specific version of the PaperMC server, which are downloaded from the official PaperMC build server.
