@@ -137,7 +137,8 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push
+      - name: Build and push (Normal releases)
+        if: ${{ !contains(matrix.version, 'pre') }}
         uses: docker/build-push-action@v6
         with:
           context: ./container
@@ -149,6 +150,25 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/papermc:${{ env.PAPERMC_VERSION }}
             ${{ secrets.DOCKERHUB_USERNAME }}/papermc:${{ env.PAPERMC_VERSION_GROUP }}
             ghcr.io/${{ env.REPOSITORY_LOWERCASE }}:latest
+            ghcr.io/${{ env.REPOSITORY_LOWERCASE }}:${{ env.PAPERMC_VERSION }}-${{ env.PAPERMC_BUILD }}
+            ghcr.io/${{ env.REPOSITORY_LOWERCASE }}:${{ env.PAPERMC_VERSION }}
+            ghcr.io/${{ env.REPOSITORY_LOWERCASE }}:${{ env.PAPERMC_VERSION_GROUP }}
+          build-args: |
+            PAPERMC_DOWNLOAD_URL=${{ env.PAPERMC_DOWNLOAD_URL }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push (Pre-releases)
+        if: ${{ contains(matrix.version, 'pre') }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ./container
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/papermc:${{ env.PAPERMC_VERSION }}-${{ env.PAPERMC_BUILD }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/papermc:${{ env.PAPERMC_VERSION }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/papermc:${{ env.PAPERMC_VERSION_GROUP }}
             ghcr.io/${{ env.REPOSITORY_LOWERCASE }}:${{ env.PAPERMC_VERSION }}-${{ env.PAPERMC_BUILD }}
             ghcr.io/${{ env.REPOSITORY_LOWERCASE }}:${{ env.PAPERMC_VERSION }}
             ghcr.io/${{ env.REPOSITORY_LOWERCASE }}:${{ env.PAPERMC_VERSION_GROUP }}
