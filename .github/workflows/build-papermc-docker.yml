@@ -79,17 +79,30 @@ jobs:
     steps:
       - name: Set environment variables
         run: |
-          PAPERMC_VERSION=$(cut -d '-' -f 1 <<< "${{ matrix.version }}")
+          VERSION="${{ matrix.version }}"
+          echo "Processing version: ${VERSION}"
+
+          # Check if it's a pre-release version
+          if [[ "${VERSION}" =~ ^([0-9]+\.[0-9]+\.[0-9]+)-pre([0-9]+)-([0-9]+)$ ]]; then
+              # Pre-release version: 1.21.9-pre2-3
+              PAPERMC_VERSION="${BASH_REMATCH[1]}-pre${BASH_REMATCH[2]}"
+              PAPERMC_BUILD="${BASH_REMATCH[3]}"
+          else
+              # Normal version: 1.21.4-229
+              PAPERMC_VERSION=$(cut -d '-' -f 1 <<< "${VERSION}")
+              PAPERMC_BUILD=$(cut -d '-' -f 2 <<< "${VERSION}")
+          fi
+
           echo "PAPERMC_VERSION=${PAPERMC_VERSION}" >> $GITHUB_ENV
 
           PAPERMC_VERSION_GROUP=$(cut -d '.' -f 1,2 <<< "${PAPERMC_VERSION}")
           echo "PAPERMC_VERSION_GROUP=${PAPERMC_VERSION_GROUP}" >> $GITHUB_ENV
 
-          PAPERMC_BUILD=$(cut -d '-' -f 2 <<< "${{ matrix.version }}")
           echo "PAPERMC_BUILD=${PAPERMC_BUILD}" >> $GITHUB_ENV
 
-          curl -s "https://api.papermc.io/v2/projects/paper/versions/${PAPERMC_VERSION}/builds/${PAPERMC_BUILD}" > papermc_build_${{ matrix.version }}.json
-          PAPERMC_DOWNLOAD_FILENAME=$(jq -r '.downloads.application.name' papermc_build_${{ matrix.version }}.json)
+          # API call and file processing
+          curl -s "https://api.papermc.io/v2/projects/paper/versions/${PAPERMC_VERSION}/builds/${PAPERMC_BUILD}" > papermc_build_${VERSION}.json
+          PAPERMC_DOWNLOAD_FILENAME=$(jq -r '.downloads.application.name' papermc_build_${VERSION}.json)
           echo "PAPERMC_DOWNLOAD_FILENAME=${PAPERMC_DOWNLOAD_FILENAME}" >> $GITHUB_ENV
 
           PAPERMC_DOWNLOAD_URL=https://api.papermc.io/v2/projects/paper/versions/${PAPERMC_VERSION}/builds/${PAPERMC_BUILD}/downloads/${PAPERMC_DOWNLOAD_FILENAME}
