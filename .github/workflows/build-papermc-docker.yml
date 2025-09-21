@@ -168,10 +168,8 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/papermc:${{ env.PAPERMC_VERSION }}-${{ env.PAPERMC_BUILD }}
             ${{ secrets.DOCKERHUB_USERNAME }}/papermc:${{ env.PAPERMC_VERSION }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/papermc:${{ env.PAPERMC_VERSION_GROUP }}
             ghcr.io/${{ env.REPOSITORY_LOWERCASE }}:${{ env.PAPERMC_VERSION }}-${{ env.PAPERMC_BUILD }}
             ghcr.io/${{ env.REPOSITORY_LOWERCASE }}:${{ env.PAPERMC_VERSION }}
-            ghcr.io/${{ env.REPOSITORY_LOWERCASE }}:${{ env.PAPERMC_VERSION_GROUP }}
           build-args: |
             PAPERMC_DOWNLOAD_URL=${{ env.PAPERMC_DOWNLOAD_URL }}
           cache-from: type=gha
