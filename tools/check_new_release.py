@@ -11,10 +11,9 @@ from semver import Version
 # ================== GLOBALS =================================================
 
 PROJECT = "paper"
-API_BASE_URL = "https://api.papermc.io/v2"
 
 API_CONFIGURATION = papermc_api_client.Configuration(
-    host = "https://api.papermc.io"
+    host = "https://fill.papermc.io"
 )
 
 # ================== TOOLS ===================================================
@@ -61,62 +60,61 @@ def coerce(version: str) -> Tuple[Version, Optional[str]]:
 # ================== MAIN AND FUNC============================================
 
 
-def simplify_version_dict(version_dict: dict[str, list[papermc_api_client.VersionBuild]]) -> dict[str, list[str]]:
+def simplify_version_dict(version_dict: dict[str, list[int]]) -> list[str]:
     """
         Simplify the version dict to a list of strings
-        Reduce list of version contains list of Version object to list of string
+        Reduce dict of version containing list of build numbers to list of string
         i.e:
         {
-            "1.16": [..., {build: 121, ...}, {build: 122, ...}, ...],
-            "1.17": [..., {build: 12, ...}, {build: 13, ...}, ...]
+            "1.16": [121, 122, ...],
+            "1.17": [12, 13, ...]
         }
         to
         [
             "1.16-121", "1.16-122", "1.17-12", "1.17-13"
         ]
     """
-    return [f"{version}-{build.build}" for version, builds in work_versions.items() for build in builds]
+    return [f"{version}-{build}" for version, builds in version_dict.items() for build in builds]
 
-def get_papermc_versions() -> list[str]:
+def get_papermc_versions_with_builds() -> dict[str, list[int]]:
     """
-        Get all versions from PaperMC
+        Get all versions from PaperMC with their builds using the v3 API.
+        Returns a dict mapping version id to list of build numbers.
     """
     with papermc_api_client.ApiClient(API_CONFIGURATION) as api_client:
-        api_instance = papermc_api_client.ProjectControllerApi(api_client)
+        api_instance = papermc_api_client.MetaV3Api(api_client)
         try:
-            project_response = api_instance.project(PROJECT)
-            return project_response.versions
+            versions_response = api_instance.get_versions(PROJECT)
+            return {
+                v.version.id: v.builds
+                for v in versions_response.versions
+                if v.version and v.version.id and v.builds
+            }
         except Exception as e:
-            print("Exception when calling ProjectControllerApi->project: %s\n" % e)
-    return []
-
-def get_builds_for_version(version: str) -> list[papermc_api_client.VersionBuild]:
-    """
-        Get all builds for a version
-    """
-    with papermc_api_client.ApiClient(API_CONFIGURATION) as api_client:
-        api_instance = papermc_api_client.VersionBuildsControllerApi(api_client)
-        try:
-            builds_response = api_instance.builds(PROJECT, version)
-            return builds_response.builds
-        except Exception as e:
-            print("Exception when calling VersionControllerApi->version: %s\n" % e)
-    return []
+            print("Exception when calling MetaV3Api->get_versions: %s\n" % e)
+    return {}
 
 def filter_versions(versions: list[str], exclude_version_before: str) -> list[str]:
     """
         Filter versions with semver rules and exclude version before a specific
-        version
+        version. Also excludes pre-release versions (rc, pre, snapshot, etc.)
+        as the PaperMC builds API doesn't support them.
     """
+    # Pattern to detect pre-release versions (e.g., 1.21.11-rc3, 1.21-pre1)
+    prerelease_pattern = re.compile(r'-(rc|pre|snapshot)', re.IGNORECASE)
+
     selected_versions = []
     for version in versions:
+        # Skip pre-release versions
+        if prerelease_pattern.search(version):
+            continue
         coerce_version, coerce_rest = coerce(version)
         if exclude_version_before > coerce_version:
             continue
         selected_versions.append(version)
     return selected_versions
 
-def get_wanted_docker_versions(previous_state: dict[str, int], work_versions: dict[str, list[papermc_api_client.VersionBuild]]):
+def get_wanted_docker_versions(previous_state: list[str], work_versions: dict[str, list[int]]) -> list[str]:
     """
         Get all versions that need to build docker image with difference from
         previous state and current state
@@ -178,22 +176,18 @@ def parse_version(version: str) -> Tuple[int, int, int, bool, Union[int, str], i
 
 if __name__ == "__main__":
     exclude_version_before = semver.Version.parse("1.21.4")
-    # exclude_build_before = "221"
 
     # Load last run state from workflow
     last_docker_build_state = load_last_docker_build_state()
 
-    # Load all versions from PaperMC
-    all_versions = get_papermc_versions()
+    # Load all versions with builds from PaperMC v3 API
+    all_versions_with_builds = get_papermc_versions_with_builds()
 
     # Filter versions with semver rules
-    keep_versions = filter_versions(all_versions, exclude_version_before)
+    keep_versions = filter_versions(list(all_versions_with_builds.keys()), exclude_version_before)
 
-    # Get all builds for each version
-    work_versions = {}
-    for version in keep_versions:
-        all_builds = get_builds_for_version(version)
-        work_versions[version] = all_builds
+    # Keep only filtered versions
+    work_versions = {v: all_versions_with_builds[v] for v in keep_versions}
 
     need_build_docker_versions = get_wanted_docker_versions(last_docker_build_state["build"], work_versions)
     last_docker_build_state["need_build"] = list(set(last_docker_build_state["need_build"] + need_build_docker_versions))
