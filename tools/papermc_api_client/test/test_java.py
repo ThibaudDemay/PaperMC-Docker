@@ -14,10 +14,10 @@
 
 import unittest
 
-from papermc_api_client.models.project_response import ProjectResponse
+from papermc_api_client.models.java import Java
 
-class TestProjectResponse(unittest.TestCase):
-    """ProjectResponse unit test stubs"""
+class TestJava(unittest.TestCase):
+    """Java unit test stubs"""
 
     def setUp(self):
         pass
@@ -25,32 +25,30 @@ class TestProjectResponse(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def make_instance(self, include_optional) -> ProjectResponse:
-        """Test ProjectResponse
+    def make_instance(self, include_optional) -> Java:
+        """Test Java
             include_optional is a boolean, when False only required
             params are included, when True both required and
             optional params are included """
-        # uncomment below to create an instance of `ProjectResponse`
+        # uncomment below to create an instance of `Java`
         """
-        model = ProjectResponse()
+        model = Java()
         if include_optional:
-            return ProjectResponse(
-                project = papermc_api_client.models.project.Project(
-                    id = '', 
-                    name = '', ),
-                versions = {
-                    'key' : [
+            return Java(
+                flags = papermc_api_client.models.java_flags.JavaFlags(
+                    recommended = [
                         ''
-                        ]
-                    }
+                        ], ),
+                version = papermc_api_client.models.java_version.JavaVersion(
+                    minimum = 56, )
             )
         else:
-            return ProjectResponse(
+            return Java(
         )
         """
 
-    def testProjectResponse(self):
-        """Test ProjectResponse"""
+    def testJava(self):
+        """Test Java"""
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 

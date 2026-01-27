@@ -5,15 +5,11 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**project_id** | **str** |  | [optional] 
-**project_name** | **str** |  | [optional] 
-**version** | **str** |  | [optional] 
-**build** | **int** |  | [optional] 
-**time** | **datetime** |  | [optional] 
 **channel** | **str** |  | [optional] 
-**promoted** | **bool** |  | [optional] 
-**changes** | [**List[Change]**](Change.md) |  | [optional] 
+**commits** | [**List[Commit]**](Commit.md) |  | [optional] 
 **downloads** | [**Dict[str, Download]**](Download.md) |  | [optional] 
+**id** | **int** |  | [optional] 
+**time** | **datetime** |  | [optional] 
 
 ## Example
 

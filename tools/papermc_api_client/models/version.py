@@ -19,17 +19,19 @@ import json
 
 from pydantic import BaseModel, ConfigDict, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from papermc_api_client.models.project import Project
+from papermc_api_client.models.java import Java
+from papermc_api_client.models.support import Support
 from typing import Optional, Set
 from typing_extensions import Self
 
-class ProjectResponse(BaseModel):
+class Version(BaseModel):
     """
-    ProjectResponse
+    Version
     """ # noqa: E501
-    project: Optional[Project] = None
-    versions: Optional[Dict[str, List[StrictStr]]] = None
-    __properties: ClassVar[List[str]] = ["project", "versions"]
+    id: Optional[StrictStr] = None
+    java: Optional[Java] = None
+    support: Optional[Support] = None
+    __properties: ClassVar[List[str]] = ["id", "java", "support"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,7 +51,7 @@ class ProjectResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of ProjectResponse from a JSON string"""
+        """Create an instance of Version from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -70,14 +72,17 @@ class ProjectResponse(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of project
-        if self.project:
-            _dict['project'] = self.project.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of java
+        if self.java:
+            _dict['java'] = self.java.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of support
+        if self.support:
+            _dict['support'] = self.support.to_dict()
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of ProjectResponse from a dict"""
+        """Create an instance of Version from a dict"""
         if obj is None:
             return None
 
@@ -85,8 +90,9 @@ class ProjectResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "project": Project.from_dict(obj["project"]) if obj.get("project") is not None else None,
-            "versions": obj.get("versions")
+            "id": obj.get("id"),
+            "java": Java.from_dict(obj["java"]) if obj.get("java") is not None else None,
+            "support": Support.from_dict(obj["support"]) if obj.get("support") is not None else None
         })
         return _obj
 

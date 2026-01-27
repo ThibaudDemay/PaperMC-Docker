@@ -5,10 +5,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**project_id** | **str** |  | [optional] 
-**project_name** | **str** |  | [optional] 
-**version** | **str** |  | [optional] 
 **builds** | **List[int]** |  | [optional] 
+**version** | [**Version**](Version.md) |  | [optional] 
 
 ## Example
 

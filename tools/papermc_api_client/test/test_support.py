@@ -14,10 +14,10 @@
 
 import unittest
 
-from papermc_api_client.models.project_response import ProjectResponse
+from papermc_api_client.models.support import Support
 
-class TestProjectResponse(unittest.TestCase):
-    """ProjectResponse unit test stubs"""
+class TestSupport(unittest.TestCase):
+    """Support unit test stubs"""
 
     def setUp(self):
         pass
@@ -25,32 +25,26 @@ class TestProjectResponse(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def make_instance(self, include_optional) -> ProjectResponse:
-        """Test ProjectResponse
+    def make_instance(self, include_optional) -> Support:
+        """Test Support
             include_optional is a boolean, when False only required
             params are included, when True both required and
             optional params are included """
-        # uncomment below to create an instance of `ProjectResponse`
+        # uncomment below to create an instance of `Support`
         """
-        model = ProjectResponse()
+        model = Support()
         if include_optional:
-            return ProjectResponse(
-                project = papermc_api_client.models.project.Project(
-                    id = '', 
-                    name = '', ),
-                versions = {
-                    'key' : [
-                        ''
-                        ]
-                    }
+            return Support(
+                end = datetime.datetime.strptime('1975-12-30', '%Y-%m-%d').date(),
+                status = 'SUPPORTED'
             )
         else:
-            return ProjectResponse(
+            return Support(
         )
         """
 
-    def testProjectResponse(self):
-        """Test ProjectResponse"""
+    def testSupport(self):
+        """Test Support"""
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 

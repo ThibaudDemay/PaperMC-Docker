@@ -17,19 +17,19 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
+from pydantic import BaseModel, ConfigDict, StrictBool, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from papermc_api_client.models.project import Project
 from typing import Optional, Set
 from typing_extensions import Self
 
-class ProjectResponse(BaseModel):
+class ErrorResponse(BaseModel):
     """
-    ProjectResponse
+    ErrorResponse
     """ # noqa: E501
-    project: Optional[Project] = None
-    versions: Optional[Dict[str, List[StrictStr]]] = None
-    __properties: ClassVar[List[str]] = ["project", "versions"]
+    error: Optional[StrictStr] = None
+    message: Optional[StrictStr] = None
+    ok: Optional[StrictBool] = None
+    __properties: ClassVar[List[str]] = ["error", "message", "ok"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,7 +49,7 @@ class ProjectResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of ProjectResponse from a JSON string"""
+        """Create an instance of ErrorResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -70,14 +70,11 @@ class ProjectResponse(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of project
-        if self.project:
-            _dict['project'] = self.project.to_dict()
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of ProjectResponse from a dict"""
+        """Create an instance of ErrorResponse from a dict"""
         if obj is None:
             return None
 
@@ -85,8 +82,9 @@ class ProjectResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "project": Project.from_dict(obj["project"]) if obj.get("project") is not None else None,
-            "versions": obj.get("versions")
+            "error": obj.get("error"),
+            "message": obj.get("message"),
+            "ok": obj.get("ok")
         })
         return _obj
 

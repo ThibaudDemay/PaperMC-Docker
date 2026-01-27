@@ -17,19 +17,28 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
-from papermc_api_client.models.project import Project
+from typing_extensions import Annotated
 from typing import Optional, Set
 from typing_extensions import Self
 
-class ProjectResponse(BaseModel):
+class Checksums(BaseModel):
     """
-    ProjectResponse
+    Checksums
     """ # noqa: E501
-    project: Optional[Project] = None
-    versions: Optional[Dict[str, List[StrictStr]]] = None
-    __properties: ClassVar[List[str]] = ["project", "versions"]
+    sha256: Optional[Annotated[str, Field(strict=True)]] = None
+    __properties: ClassVar[List[str]] = ["sha256"]
+
+    @field_validator('sha256')
+    def sha256_validate_regular_expression(cls, value):
+        """Validates the regular expression"""
+        if value is None:
+            return value
+
+        if not re.match(r"\b[a-fA-F0-9]{64}\b", value):
+            raise ValueError(r"must validate the regular expression /\b[a-fA-F0-9]{64}\b/")
+        return value
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,7 +58,7 @@ class ProjectResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of ProjectResponse from a JSON string"""
+        """Create an instance of Checksums from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -70,14 +79,11 @@ class ProjectResponse(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of project
-        if self.project:
-            _dict['project'] = self.project.to_dict()
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of ProjectResponse from a dict"""
+        """Create an instance of Checksums from a dict"""
         if obj is None:
             return None
 
@@ -85,8 +91,7 @@ class ProjectResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "project": Project.from_dict(obj["project"]) if obj.get("project") is not None else None,
-            "versions": obj.get("versions")
+            "sha256": obj.get("sha256")
         })
         return _obj
 

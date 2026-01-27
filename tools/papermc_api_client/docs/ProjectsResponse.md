@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**projects** | **List[str]** |  | [optional] 
+**projects** | [**List[ProjectResponse]**](ProjectResponse.md) |  | [optional] 
 
 ## Example
 

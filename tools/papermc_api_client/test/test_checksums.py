@@ -14,10 +14,10 @@
 
 import unittest
 
-from papermc_api_client.models.project_response import ProjectResponse
+from papermc_api_client.models.checksums import Checksums
 
-class TestProjectResponse(unittest.TestCase):
-    """ProjectResponse unit test stubs"""
+class TestChecksums(unittest.TestCase):
+    """Checksums unit test stubs"""
 
     def setUp(self):
         pass
@@ -25,32 +25,25 @@ class TestProjectResponse(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def make_instance(self, include_optional) -> ProjectResponse:
-        """Test ProjectResponse
+    def make_instance(self, include_optional) -> Checksums:
+        """Test Checksums
             include_optional is a boolean, when False only required
             params are included, when True both required and
             optional params are included """
-        # uncomment below to create an instance of `ProjectResponse`
+        # uncomment below to create an instance of `Checksums`
         """
-        model = ProjectResponse()
+        model = Checksums()
         if include_optional:
-            return ProjectResponse(
-                project = papermc_api_client.models.project.Project(
-                    id = '', 
-                    name = '', ),
-                versions = {
-                    'key' : [
-                        ''
-                        ]
-                    }
+            return Checksums(
+                sha256 = '62ECB020842930cc01FFCCfeEe150AC32DcAEc8a83DDD7dBF7567C88195ffcea'
             )
         else:
-            return ProjectResponse(
+            return Checksums(
         )
         """
 
-    def testProjectResponse(self):
-        """Test ProjectResponse"""
+    def testChecksums(self):
+        """Test Checksums"""
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 

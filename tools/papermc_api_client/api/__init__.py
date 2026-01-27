@@ -1,12 +1,6 @@
 # flake8: noqa
 
 # import apis into api package
-from papermc_api_client.api.download_controller_api import DownloadControllerApi
-from papermc_api_client.api.project_controller_api import ProjectControllerApi
-from papermc_api_client.api.projects_controller_api import ProjectsControllerApi
-from papermc_api_client.api.version_build_controller_api import VersionBuildControllerApi
-from papermc_api_client.api.version_builds_controller_api import VersionBuildsControllerApi
-from papermc_api_client.api.version_controller_api import VersionControllerApi
-from papermc_api_client.api.version_family_builds_controller_api import VersionFamilyBuildsControllerApi
-from papermc_api_client.api.version_family_controller_api import VersionFamilyControllerApi
+from papermc_api_client.api.meta_v2_api import MetaV2Api
+from papermc_api_client.api.meta_v3_api import MetaV3Api
 

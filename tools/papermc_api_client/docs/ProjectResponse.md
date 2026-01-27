@@ -5,10 +5,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**project_id** | **str** |  | [optional] 
-**project_name** | **str** |  | [optional] 
-**version_groups** | **List[str]** |  | [optional] 
-**versions** | **List[str]** |  | [optional] 
+**project** | [**Project**](Project.md) |  | [optional] 
+**versions** | **Dict[str, List[str]]** |  | [optional] 
 
 ## Example
 

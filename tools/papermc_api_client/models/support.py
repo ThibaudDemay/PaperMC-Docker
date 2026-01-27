@@ -17,19 +17,29 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
+from datetime import date
+from pydantic import BaseModel, ConfigDict, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
-from papermc_api_client.models.project import Project
 from typing import Optional, Set
 from typing_extensions import Self
 
-class ProjectResponse(BaseModel):
+class Support(BaseModel):
     """
-    ProjectResponse
+    Support
     """ # noqa: E501
-    project: Optional[Project] = None
-    versions: Optional[Dict[str, List[StrictStr]]] = None
-    __properties: ClassVar[List[str]] = ["project", "versions"]
+    end: Optional[date] = None
+    status: Optional[StrictStr] = None
+    __properties: ClassVar[List[str]] = ["end", "status"]
+
+    @field_validator('status')
+    def status_validate_enum(cls, value):
+        """Validates the enum"""
+        if value is None:
+            return value
+
+        if value not in set(['SUPPORTED', 'DEPRECATED', 'UNSUPPORTED']):
+            raise ValueError("must be one of enum values ('SUPPORTED', 'DEPRECATED', 'UNSUPPORTED')")
+        return value
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,7 +59,7 @@ class ProjectResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of ProjectResponse from a JSON string"""
+        """Create an instance of Support from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -70,14 +80,11 @@ class ProjectResponse(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of project
-        if self.project:
-            _dict['project'] = self.project.to_dict()
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of ProjectResponse from a dict"""
+        """Create an instance of Support from a dict"""
         if obj is None:
             return None
 
@@ -85,8 +92,8 @@ class ProjectResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "project": Project.from_dict(obj["project"]) if obj.get("project") is not None else None,
-            "versions": obj.get("versions")
+            "end": obj.get("end"),
+            "status": obj.get("status")
         })
         return _obj
 
