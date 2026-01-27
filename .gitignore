@@ -2,3 +2,4 @@ last_docker_build_state.json
 .venv
 .pdm-python
 __pycache__
+data/
