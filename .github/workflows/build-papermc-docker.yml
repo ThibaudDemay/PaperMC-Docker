@@ -101,11 +101,11 @@ jobs:
           echo "PAPERMC_BUILD=${PAPERMC_BUILD}" >> $GITHUB_ENV
 
           # API call and file processing
-          curl -s "https://api.papermc.io/v2/projects/paper/versions/${PAPERMC_VERSION}/builds/${PAPERMC_BUILD}" > papermc_build_${VERSION}.json
-          PAPERMC_DOWNLOAD_FILENAME=$(jq -r '.downloads.application.name' papermc_build_${VERSION}.json)
+          curl -s "https://fill.papermc.io/v2/projects/paper/versions/${PAPERMC_VERSION}/builds/${PAPERMC_BUILD}" > papermc_build_${VERSION}.json
+          PAPERMC_DOWNLOAD_FILENAME=$(jq -r '.downloads.server:default.name' papermc_build_${VERSION}.json)
           echo "PAPERMC_DOWNLOAD_FILENAME=${PAPERMC_DOWNLOAD_FILENAME}" >> $GITHUB_ENV
 
-          PAPERMC_DOWNLOAD_URL=https://api.papermc.io/v2/projects/paper/versions/${PAPERMC_VERSION}/builds/${PAPERMC_BUILD}/downloads/${PAPERMC_DOWNLOAD_FILENAME}
+          PAPERMC_DOWNLOAD_URL=$(jq -r '.downloads.server:default.url' papermc_build_${VERSION}.json)
           echo "PAPERMC_DOWNLOAD_URL=${PAPERMC_DOWNLOAD_URL}" >> $GITHUB_ENV
 
           echo "REPOSITORY_LOWERCASE=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
