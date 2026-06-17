@@ -152,10 +152,11 @@ def parse_version(version: str) -> Tuple[int, int, int, bool, Union[int, str], i
     """
 
     # Pattern to match different formats
-    # Group 1,2,3: major.minor.patch
+    # Group 1,2: major.minor
+    # Group 3: optional .patch
     # Group 4: optional “pre” + number
     # Group 5: final build number
-    pattern = r'^(\d+)\.(\d+)\.(\d+)(?:-pre(\d+))?-(\d+)$'
+    pattern = r'^(\d+)\.(\d+)(?:\.(\d+))?(?:-pre(\d+))?-(\d+)$'
 
     match = re.match(pattern, version)
     if not match:
@@ -163,7 +164,7 @@ def parse_version(version: str) -> Tuple[int, int, int, bool, Union[int, str], i
 
     major = int(match.group(1))
     minor = int(match.group(2))
-    patch = int(match.group(3))
+    patch = int(match.group(3)) if match.group(3) else 0
     pre_number = int(match.group(4)) if match.group(4) else None
     build = int(match.group(5))
 
